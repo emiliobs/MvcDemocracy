@@ -16,6 +16,8 @@ namespace MvcDemocracy.Models
 
         public DbSet<State> States { get; set; }
 
-        public System.Data.Entity.DbSet<MvcDemocracy.Models.Group> Groups { get; set; }
+        public DbSet<MvcDemocracy.Models.Group> Groups { get; set; }
+
+        public DbSet<MvcDemocracy.Models.Voting> Votings { get; set; }
     }
 }

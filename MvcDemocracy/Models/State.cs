@@ -23,6 +23,10 @@ namespace MvcDemocracy.Models
 
         [StringLength(50, ErrorMessage =("The field {0} can contain maximun {1} an minimum {2} character"), MinimumLength = 3)]
         [Required(ErrorMessage = "The field {0} is Requered")]
+        [Display(Name = "State Description")]
         public string Description { get; set; }
+
+        public virtual ICollection<Voting> Votings { get; set; }
+
     }
 }
