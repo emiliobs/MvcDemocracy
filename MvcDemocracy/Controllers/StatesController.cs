@@ -9,6 +9,7 @@ using System.Web.Mvc;
 
 namespace MvcDemocracy.Controllers
 {
+    [Authorize]
     public class StatesController : Controller
     {
         MvcDemocracyContext db = new MvcDemocracyContext();

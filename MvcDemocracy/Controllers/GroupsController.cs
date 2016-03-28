@@ -10,6 +10,7 @@ using MvcDemocracy.Models;
 
 namespace MvcDemocracy.Controllers
 {
+    [Authorize]
     public class GroupsController : Controller
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();

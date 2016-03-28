@@ -19,5 +19,7 @@ namespace MvcDemocracy.Models
         public DbSet<MvcDemocracy.Models.Group> Groups { get; set; }
 
         public DbSet<MvcDemocracy.Models.Voting> Votings { get; set; }
+
+        public DbSet<User> Users { get; set; }
     }
 }
