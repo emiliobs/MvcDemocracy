@@ -12,6 +12,8 @@ namespace MvcDemocracy.Models
     public class UserView
     {
        
+        public int UserId { get; set; }
+
         [DataType(DataType.EmailAddress)]
         [Required(ErrorMessage = "The field {0} is required")]
         [StringLength(100, ErrorMessage = "The field {0} can contain maximun {1} and minimum {2} characteres", MinimumLength = 7)]

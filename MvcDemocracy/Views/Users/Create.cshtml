@@ -8,7 +8,7 @@
 <h3>@ViewBag.Error</h3>
 
 @*// se debe color para la captura de archivos:*@
-@using (Html.BeginForm("Create", "Users", FormMethod.Post, new { enctype = "multipart/form-data"}))
+@using (Html.BeginForm("Create", "Users", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
     

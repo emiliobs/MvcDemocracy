@@ -50,68 +50,72 @@ namespace MvcDemocracy.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(UserView userView)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-
-                //Upload image
-                string path = string.Empty;
-                string picture = string.Empty;
-
-                if (userView.Photo !=null)
-                {
-                    picture = Path.GetFileName(userView.Photo.FileName);
-                    //~ genera una ruta relativa:
-                    path = Path.Combine(Server.MapPath("~/Content/Photos"), picture);
-                    userView.Photo.SaveAs(path);
-
-                    using (MemoryStream ms = new MemoryStream ())
-                    {
-                        userView.Photo.InputStream.CopyTo(ms);
-                        byte[] array = ms.GetBuffer();
-                    }
-                }
-
-                //genero un objeto user atravez del objeto userview:
-                var user = new User
-                {
-                    Address = userView.Address,
-                    FirstName = userView.FirstName,
-                    Grade = userView.Grade,
-                    Group = userView.Group,
-                    lastName = userView.lastName,
-                    Phone = userView.Phone,
-                    Photo = picture == string.Empty ? string.Empty : string.Format("~/Content/Photos/{0}", picture),
-                    UserName = userView.UserName,
-                };
-
-                //save record:
-                db.Users.Add(user);
-
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-
-                    if (ex.InnerException != null && ex.InnerException.InnerException != null &&       
-                        ex.InnerException.InnerException.Message.Contains("UserNameIndex"))
-                    {
-                        ViewBag.Error = "The Email has already used for another user.";
-                    }
-                    else
-                    {
-                        ViewBag.Error = ex.Message;
-                    }
-
-                    return View(userView);
-
-                }
-
-                return RedirectToAction("Index");
+                return View(userView);
             }
 
-            return View(userView);
+            //Upload Image:
+            string path = string.Empty;
+            string picture = string.Empty;
+
+            if (userView.Photo != null)
+            {
+                picture = Path.GetFileName(userView.Photo.FileName);
+                path = Path.Combine(Server.MapPath("~/Content/Photos"), picture);
+                userView.Photo.SaveAs(path);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    userView.Photo.InputStream.CopyTo(ms);
+                    byte[] array = ms.GetBuffer();
+                }
+            }
+
+            //Save record:
+            var user = new User
+            {
+                Address = userView.Address,
+                FirstName = userView.FirstName,
+                Grade = userView.Grade,
+                Group = userView.Group,
+                lastName = userView.lastName,
+                Phone = userView.Phone,
+                Photo = picture == string.Empty ? string.Empty : string.Format("~/Content/Photos/{0}", picture),
+                UserName = userView.UserName
+            };
+
+            db.Users.Add(user);
+
+            try
+            {
+                db.SaveChanges();
+
+                this.CreateASPuser(userView);
+
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException != null &&
+                    ex.InnerException.InnerException != null
+                    && ex.InnerException.InnerException.Message.Contains("userNameIndex"))
+                {
+                    ViewBag.Error = "The Email has already used for another User.";
+                }
+                else
+                {
+                    ViewBag.Error = ex.Message;
+                }
+
+                return View(userView);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        private void CreateASPuser(UserView userView)
+        {
+           
         }
 
         // GET: Users/Edit/5
@@ -121,12 +125,27 @@ namespace MvcDemocracy.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            User user = db.Users.Find(id);
+
+            var user = db.Users.Find(id);
+
             if (user == null)
             {
                 return HttpNotFound();
             }
-            return View(user);
+
+            var userView = new UserView
+            {
+                Address = user.Address,
+                FirstName = user.FirstName,
+                Grade = user.Grade,
+                Group = user.Group,
+                lastName = user.lastName,
+                Phone = user.Phone,
+                UserId = user.UserId,
+                UserName = user.UserName,
+            };
+
+            return View(userView);
         }
 
         // POST: Users/Edit/5
@@ -134,15 +153,51 @@ namespace MvcDemocracy.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "UserId,UserName,FirstName,lastName,Phone,Address,Grade,Group,Photo")] User user)
+        public ActionResult Edit( UserView userView)
         {
             if (ModelState.IsValid)
             {
+                //Upload image
+                string path = string.Empty;
+                string picture = string.Empty;
+
+                if (userView.Photo != null)
+                {
+                    picture = Path.GetFileName(userView.Photo.FileName);
+                    //~ genera una ruta relativa:
+                    path = Path.Combine(Server.MapPath("~/Content/Photos"), picture);
+                    userView.Photo.SaveAs(path);
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        userView.Photo.InputStream.CopyTo(ms);
+                        byte[] array = ms.GetBuffer();
+                    }
+                }
+
+                var user = db.Users.Find(userView.UserId);
+
+                user.Address = userView.Address;
+                user.FirstName = userView.FirstName;
+                user.Grade = userView.Grade;
+                user.Group = userView.Group;
+                user.lastName = userView.lastName;
+                user.Phone = userView.Phone;
+
+                if (!string.IsNullOrEmpty(picture))
+                {
+                    user.Photo = string.Format("~/Content/Photos/{0}", picture);
+                }
+         
+
                 db.Entry(user).State = EntityState.Modified;
                 db.SaveChanges();
+
                 return RedirectToAction("Index");
             }
-            return View(user);
+
+
+            return View(userView);
         }
 
         // GET: Users/Delete/5
