@@ -37,7 +37,10 @@ namespace MvcDemocracy.Models
         [Required(ErrorMessage = "The field {0} is required")]
         public string Phone { get; set; }
 
-        
+        [Required(ErrorMessage = "The field {0} is required")]
+        public string FullName { get { return string.Format($"{this.FirstName} {this.lastName}"); } }
+
+
         [StringLength(100, ErrorMessage = "The field {0} can contain maximun {1} and minimum {2} characteres", MinimumLength = 7)]
         [Required(ErrorMessage = "The field {0} is required")]
         public string Address { get; set; }
@@ -50,6 +53,8 @@ namespace MvcDemocracy.Models
         [StringLength(200, ErrorMessage = "The field {0} can contain maximun {1} and minimum {2} characteres", MinimumLength = 5)]
         public string Photo { get; set; }
 
+
+        public virtual ICollection<GroupMember> GroupMembers { get; set; }
 
     }
 }

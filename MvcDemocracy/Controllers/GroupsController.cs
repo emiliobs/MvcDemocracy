@@ -15,6 +15,47 @@ namespace MvcDemocracy.Controllers
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddMember(AddMemberView view)
+        {
+            if (ModelState.IsValid)
+            {
+                var member = db.GroupMembers.Where(gm => gm.GroupId == view.GroupId  &&  gm.UserId == view.UserId).FirstOrDefault();
+
+                ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName");
+
+
+                if (member != null)
+                {
+
+                    ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName");
+
+                    ViewBag.Error = "The member already belongs to group";                      
+
+                    return View(view);
+                }
+            }
+
+
+            return View(view);
+        }
+
+
+        [HttpGet]
+        
+        public  ActionResult AddMember(int groupId)
+        {              
+            ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName");
+            var view = new AddMemberView
+            {
+                GroupId = groupId, 
+            };
+
+            return View(view);
+        }
+
+
         // GET: Groups
         public ActionResult Index()
         {

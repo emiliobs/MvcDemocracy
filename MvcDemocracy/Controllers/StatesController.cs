@@ -134,7 +134,28 @@ namespace MvcDemocracy.Controllers
             }
 
             db.States.Remove(state);
-            db.SaveChanges();
+
+            //Hay que hacerlo en todos los delete de los actionMetodos:
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+
+                if (ex.InnerException != null && 
+                    ex.InnerException.InnerException != null && 
+                    ex.InnerException.InnerException.Message.Contains("REFERENCE"))//REFERENCE SUCEDE CUANDO SE ESTA VIOLANDO UNA RELACION FOREING KEY:
+                {
+                    ViewBag.Error = "Can't delete the record, because has related records.....";
+                 }
+                else
+                {
+                    ViewBag.Error = ex.Message;
+                }
+
+                return View(state);
+            }
 
             return RedirectToAction("Index");
         }
