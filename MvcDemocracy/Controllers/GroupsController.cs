@@ -15,6 +15,21 @@ namespace MvcDemocracy.Controllers
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
+        [HttpGet]
+        public ActionResult DeleteMember(int groupMemberId)
+        {
+            //busco en la bd el Id del miembro a eliminar:
+            var member = db.GroupMembers.Find(groupMemberId);
+
+            if (member != null)
+            {
+                db.GroupMembers.Remove(member);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction(string.Format("Details/{0}", member.GroupId));
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddMember(AddMemberView view)
@@ -23,19 +38,32 @@ namespace MvcDemocracy.Controllers
             {
                 var member = db.GroupMembers.Where(gm => gm.GroupId == view.GroupId  &&  gm.UserId == view.UserId).FirstOrDefault();
 
-                ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName");
+                ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
 
 
                 if (member != null)
                 {
 
-                    ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName");
+                    ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
 
                     ViewBag.Error = "The member already belongs to group";                      
 
                     return View(view);
                 }
+
+                member = new GroupMember
+                {
+                    GroupId = view.GroupId,
+                    UserId = view.UserId
+                };
+
+                db.GroupMembers.Add(member);
+                db.SaveChanges();
+
+                return RedirectToAction(string.Format("Details/{0}", view.GroupId));
             }
+
+            ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
 
 
             return View(view);
@@ -46,7 +74,7 @@ namespace MvcDemocracy.Controllers
         
         public  ActionResult AddMember(int groupId)
         {              
-            ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName");
+            ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
             var view = new AddMemberView
             {
                 GroupId = groupId, 
@@ -74,7 +102,15 @@ namespace MvcDemocracy.Controllers
             {
                 return HttpNotFound();
             }
-            return View(group);
+
+            var view = new GroupDetailsView
+            {
+              GroupId = group.GroupId,
+              Description = group.Description,
+              Members = group.GroupMembers.ToList(), 
+            };
+
+            return View(view);
         }
 
         // GET: Groups/Create

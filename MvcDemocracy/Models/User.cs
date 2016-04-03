@@ -38,6 +38,7 @@ namespace MvcDemocracy.Models
         public string Phone { get; set; }
 
         [Required(ErrorMessage = "The field {0} is required")]
+        [Display(Name ="User")]
         public string FullName { get { return string.Format($"{this.FirstName} {this.lastName}"); } }
 
 

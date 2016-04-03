@@ -11,7 +11,7 @@ namespace MvcDemocracy.Models
     {
         public int GroupId { get; set; }
 
-        [Required(ErrorMessage = "The field {0} is required.")]
+        [Required(ErrorMessage = "You must select a User.")]
         public int UserId { get; set; }
 
     }

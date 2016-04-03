@@ -1,4 +1,4 @@
-﻿@model MvcDemocracy.Models.Group
+﻿@model MvcDemocracy.Models.GroupDetailsView
 
 @{
     ViewBag.Title = "Details";
@@ -11,11 +11,11 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Description)
+            <h4>@Html.DisplayNameFor(model => model.Description)</h4>
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Description)
+            <h4>@Html.DisplayFor(model => model.Description)</h4>
         </dd>
 
     </dl>
@@ -25,3 +25,49 @@
     @Html.ActionLink("Add Member", "AddMember", new { groupId = Model.GroupId }, new { @class = "btn btn-warning" })
     @Html.ActionLink("Back to List", "Index", new { }, new { @class ="btn btn-success"})
 </p>
+
+<h3>Members.(@Html.DisplayFor(model => model.Description))</h3>
+@if (Model.Members.Count == 0)
+{
+    <h4>Not members added yet.</h4>
+}
+else
+{
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Members[0].User.UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Members[0].User.FullName)
+            </th>            
+            <th>
+                @Html.DisplayNameFor(model => model.Members[0].User.Photo)
+            </th>            
+            <th></th>
+        </tr>
+
+        @for (int i = 0; i < Model.Members.Count; i++)
+        {
+             <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => Model.Members[i].User.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => Model.Members[i].User.FullName)
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(Model.Members[i].User.Photo))
+                    {
+                        <img src="@Url.Content(Model.Members[i].User.Photo)" alt="Image" style="width:100px; height:100px;max-width:100%; height:auto" />
+                    }
+                </td>
+                 <td>
+                     @Html.ActionLink("Delete", "DeleteMember", new { groupMemberId = Model.Members[i].GroupMemberId }, new { @class = "btn btn-danger" , onclick = "return confirm('Are you sure to Delete?');" })
+                 </td>               
+            </tr>
+        }
+
+    </table>
+}
+
