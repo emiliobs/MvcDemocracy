@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace MvcDemocracy.Models
 {
-   public class Voting
+    public class VotingView
     {
-        [Key]
         public int VotingId { get; set; }
 
         [Required(ErrorMessage = "The field {0} is Requered")]
@@ -18,23 +17,35 @@ namespace MvcDemocracy.Models
         public string Description { get; set; }
 
         [Required(ErrorMessage = "The field {0} is Requered")]
-        [Display(Name ="State")]
+        [Display(Name = "State")]
         public int StateId { get; set; }
 
         [DataType(DataType.MultilineText)]
         public string Remarks { get; set; }
 
         [Required(ErrorMessage = "The field {0} is Requered")]
-        [Display(Name = "Date time start")]
-        [DataType(DataType.DateTime)]
-       // [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode =true)]
-        public DateTime DateTimeStart { get; set; }
+        [Display(Name = "Date Start")]
+        [DataType(DataType.Date)]
+        // [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode =true)]
+        public DateTime DateStart { get; set; }
 
-        [Display(Name = "Date time end")]
         [Required(ErrorMessage = "The field {0} is Requered")]
-        [DataType(DataType.DateTime)]
-       // [DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime DateTimeEnd { get; set; }
+        [Display(Name = "Time Start")]
+        [DataType(DataType.Time)]
+        // [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode =true)]
+        public DateTime TimeStart { get; set; }
+
+        [Display(Name = "Date End")]
+        [Required(ErrorMessage = "The field {0} is Requered")]
+        [DataType(DataType.Date)]
+        // [DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime DateEnd { get; set; }
+
+        [Display(Name = "Time End")]
+        [Required(ErrorMessage = "The field {0} is Requered")]
+        [DataType(DataType.Time)]
+        // [DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime TimeEnd { get; set; }
 
         [Display(Name = "Is For All Users?")]
         [Required(ErrorMessage = "The field {0} is Requered")]
@@ -43,18 +54,5 @@ namespace MvcDemocracy.Models
         [Required(ErrorMessage = "The field {0} is Requered")]
         [Display(Name = "Is Enable Blank Vote?")]
         public bool IsEnableBlankVote { get; set; }
-
-        [Display(Name = "Quantity Votes")]
-        public int QuantityVotes { get; set; }
-
-        [Display(Name = "Quantity Blank Votes")]
-        public int QuantityBlankVotes { get; set; }
-
-        [Display(Name = "Winner")]
-        public int CandidateWinId { get; set; }
-
-        [Display(Name = "State")]
-        public virtual State States { get; set; }
-
     }
 }

@@ -41,7 +41,14 @@ namespace MvcDemocracy.Controllers
         public ActionResult Create()
         {
             ViewBag.StateId = new SelectList(db.States, "StateId", "Description");
-            return View();
+
+            var view = new VotingView
+            {
+                DateStart = DateTime.Now,
+                DateEnd = DateTime.Now,
+            };
+
+            return View(view);
         }
 
         // POST: Votings/Create
@@ -49,17 +56,29 @@ namespace MvcDemocracy.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "VotingId,Description,StateId,Remarks,DateTimeStart,DateTimeEnd,IsForAllUsers,IsEnableBlankVote,QuantityVotes,QuantityBlankVotes,CandidateWinId")] Voting voting)
+        public ActionResult Create(VotingView votingView)
         {
             if (ModelState.IsValid)
             {
+                var voting = new Voting
+                {
+                  DateTimeStart = votingView.DateStart.AddHours(votingView.TimeStart.Hour).AddMinutes(votingView.TimeStart.Minute),
+                  DateTimeEnd   = votingView.DateEnd.AddHours(votingView.TimeEnd.Hour).AddMinutes(votingView.TimeEnd.Minute),
+                  Description = votingView.Description,
+                  IsEnableBlankVote = votingView.IsEnableBlankVote,
+                  IsForAllUsers = votingView.IsForAllUsers,
+                  Remarks = votingView.Remarks,
+                  StateId = votingView.StateId,
+
+                };
+
                 db.Votings.Add(voting);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.StateId = new SelectList(db.States, "StateId", "Description", voting.StateId);
-            return View(voting);
+            ViewBag.StateId = new SelectList(db.States, "StateId", "Description", votingView.StateId);
+            return View(votingView);
         }
 
         // GET: Votings/Edit/5
@@ -74,8 +93,26 @@ namespace MvcDemocracy.Controllers
             {
                 return HttpNotFound();
             }
+
+            var view = new VotingView
+            {
+               DateEnd = voting.DateTimeEnd,
+               DateStart = voting.DateTimeStart,
+               Description = voting.Description,
+               IsEnableBlankVote = voting.IsEnableBlankVote,
+               IsForAllUsers = voting.IsForAllUsers,
+               Remarks = voting.Remarks,
+               StateId = voting.StateId,
+               TimeEnd = voting.DateTimeEnd,
+               TimeStart = voting.DateTimeStart,
+               VotingId = voting.VotingId,
+            };
+
             ViewBag.StateId = new SelectList(db.States, "StateId", "Description", voting.StateId);
-            return View(voting);
+
+            
+
+            return View(view);
         }
 
         // POST: Votings/Edit/5
@@ -116,8 +153,29 @@ namespace MvcDemocracy.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Voting voting = db.Votings.Find(id);
+
             db.Votings.Remove(voting);
-            db.SaveChanges();
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+
+                if (ex.InnerException != null && ex.InnerException.InnerException != null && 
+                    ex.InnerException.InnerException.Message.Contains("REFERENCE"))
+                {
+                    ViewBag.Error = "Can't delete the record, because has related records......";
+                }
+                else
+                {
+                    ViewBag.Error = ex.Message;
+                }
+
+                return View(voting);
+            }
+
             return RedirectToAction("Index");
         }
 

@@ -250,8 +250,30 @@ namespace MvcDemocracy.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             User user = db.Users.Find(id);
+
             db.Users.Remove(user);
-            db.SaveChanges();
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+
+                if (ex.InnerException != null && ex.InnerException.InnerException != null && 
+                    ex.InnerException.InnerException.Message.Contains("REFERENCE"))
+                {
+                    ViewBag.Error = "Can't delete the record, because has related records.....";
+                }
+                else
+                {
+                    ViewBag.Error = ex.Message;
+                }
+
+                return View(user);
+            }
+
+
             return RedirectToAction("Index");
         }
 

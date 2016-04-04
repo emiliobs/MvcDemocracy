@@ -238,6 +238,7 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\UserView.cs" />
     <Compile Include="Models\Voting.cs" />
+    <Compile Include="Models\VotingView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -339,6 +340,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\Photos\" />
+    <Folder Include="Other\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

@@ -7,7 +7,7 @@
 <h2>Vontings</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Create New", "Create", new { }, new { @class = "btn btn-default" })
 </p>
 <table class="table">
     <tr>
@@ -77,9 +77,15 @@
             @Html.DisplayFor(modelItem => item.CandidateWinId)
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.VotingId }) |
-            @Html.ActionLink("Details", "Details", new { id=item.VotingId }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.VotingId })
+            @Html.ActionLink("Edit", "Edit", new { id=item.VotingId }, new { @class = "btn btn-primary" })
+            
+        </td>
+        <td>
+            @Html.ActionLink("Details", "Details", new { id = item.VotingId }, new { @class = "btn btn-info" })
+            
+        </td>
+        <td>
+            @Html.ActionLink("Delete", "Delete", new { id = item.VotingId }, new { @class = "btn btn-danger" })
         </td>
     </tr>
 }
