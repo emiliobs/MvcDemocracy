@@ -24,7 +24,8 @@ namespace MvcDemocracy.Models
         [Required(ErrorMessage = "The field {0} is Requered")]
         public string Description { get; set; }
 
-
+        //Relación unica:
         public virtual ICollection<GroupMember> GroupMembers { get; set; }
+        public virtual ICollection<VotingGroup> VotingGroups { get; set; }
     }
 }

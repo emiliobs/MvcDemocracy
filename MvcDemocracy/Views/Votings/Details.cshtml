@@ -97,7 +97,7 @@
 
     @if (!Model.IsForAllUsers)
     {
-        @Html.ActionLink("Add Group", "AddMember", new { id = Model.VotingId }, new { @class = "btn btn-warning" })
+        @Html.ActionLink("Add Group", "AddGroup", new { id = Model.VotingId }, new { @class = "btn btn-warning" })
 
     }
 

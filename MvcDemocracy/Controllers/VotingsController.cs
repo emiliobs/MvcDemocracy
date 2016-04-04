@@ -15,6 +15,57 @@ namespace MvcDemocracy.Controllers
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
+
+        [HttpPost]
+        public ActionResult AddGroup(VotingGroup  addGroupView)
+        {
+            if (ModelState.IsValid)
+            {
+                //busco si grupo existe o si ya esta seleccionado:
+                var votingGroup = db.VotingGroups.Where(vg => vg.VotingId == addGroupView.VotingId && 
+                                 vg.GroupId == addGroupView.GroupId).FirstOrDefault();//ejecuto la funcion link:
+
+                //Aquí a ver si si lo encontro:
+                if (votingGroup != null)
+                {
+                    ViewBag.Error = "Thr group already belong to Voting.";
+
+                    ViewBag.GroupId = new SelectList(db.Groups.OrderBy(g => g.Description), "GroupId", "Description");
+
+                    return View(addGroupView);
+                }
+
+                //Si no existe debo crear el objeto de bd: y despues de crear el objeto lo envio a la base de datos:
+                votingGroup = new VotingGroup
+                {
+                  GroupId = addGroupView.GroupId,
+                  VotingId = addGroupView.VotingId,
+                };
+
+                db.VotingGroups.Add(votingGroup);
+                db.SaveChanges();
+
+                return RedirectToAction($"Details/{addGroupView.VotingId}");
+            }
+
+            ViewBag.GroupId = new SelectList(db.Groups.OrderBy(g => g.Description), "GroupId", "Description");
+
+            return View(addGroupView);
+        }
+
+        [HttpGet]
+        public ActionResult AddGroup(int id)
+        {
+            ViewBag.GroupId = new SelectList(db.Groups.OrderBy(g => g.Description), "GroupId", "Description");
+
+            var view = new VotingGroup
+            {
+                VotingId = id,
+            };
+
+            return View(view);
+        }
+
         // GET: Votings
         public ActionResult Index()
         {
@@ -88,7 +139,9 @@ namespace MvcDemocracy.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+
             Voting voting = db.Votings.Find(id);
+
             if (voting == null)
             {
                 return HttpNotFound();
@@ -120,16 +173,32 @@ namespace MvcDemocracy.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "VotingId,Description,StateId,Remarks,DateTimeStart,DateTimeEnd,IsForAllUsers,IsEnableBlankVote,QuantityVotes,QuantityBlankVotes,CandidateWinId")] Voting voting)
+        public ActionResult Edit(VotingView votingView)
         {
             if (ModelState.IsValid)
             {
+
+                var voting = new Voting
+                {
+                    DateTimeStart = votingView.DateStart.AddHours(votingView.TimeStart.Hour).AddMinutes(votingView.TimeStart.Minute),
+                    DateTimeEnd = votingView.DateEnd.AddHours(votingView.TimeEnd.Hour).AddMinutes(votingView.TimeEnd.Minute),
+                    Description = votingView.Description,
+                    IsEnableBlankVote = votingView.IsEnableBlankVote,
+                    IsForAllUsers = votingView.IsForAllUsers,
+                    Remarks = votingView.Remarks,
+                    StateId = votingView.StateId,
+                    VotingId = votingView.VotingId,
+
+                };
+
                 db.Entry(voting).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.StateId = new SelectList(db.States, "StateId", "Description", voting.StateId);
-            return View(voting);
+
+            ViewBag.StateId = new SelectList(db.States, "StateId", "Description", votingView.StateId);
+
+            return View(votingView);
         }
 
         // GET: Votings/Delete/5

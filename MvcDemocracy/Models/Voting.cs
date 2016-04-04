@@ -56,5 +56,10 @@ namespace MvcDemocracy.Models
         [Display(Name = "State")]
         public virtual State States { get; set; }
 
+
+        //realción unica:
+        public virtual ICollection<VotingGroup> VotingGroups { get; set; }
+
+
     }
 }
