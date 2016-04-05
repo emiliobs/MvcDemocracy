@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace MvcDemocracy.Models
 {
-   public class Voting
+   public class DetailsVotingView
     {
-        [Key]
+      
         public int VotingId { get; set; }
 
         [Required(ErrorMessage = "The field {0} is Requered")]
@@ -18,7 +18,7 @@ namespace MvcDemocracy.Models
         public string Description { get; set; }
 
         [Required(ErrorMessage = "The field {0} is Requered")]
-        [Display(Name ="State")]
+        [Display(Name = "State")]
         public int StateId { get; set; }
 
         [DataType(DataType.MultilineText)]
@@ -27,13 +27,13 @@ namespace MvcDemocracy.Models
         [Required(ErrorMessage = "The field {0} is Requered")]
         [Display(Name = "Date time start")]
         [DataType(DataType.DateTime)]
-       // [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode =true)]
+        // [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode =true)]
         public DateTime DateTimeStart { get; set; }
 
         [Display(Name = "Date time end")]
         [Required(ErrorMessage = "The field {0} is Requered")]
         [DataType(DataType.DateTime)]
-       // [DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        // [DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime DateTimeEnd { get; set; }
 
         [Display(Name = "Is For All Users?")]
@@ -54,13 +54,11 @@ namespace MvcDemocracy.Models
         public int CandidateWinId { get; set; }
 
         [Display(Name = "State")]
-        public virtual State States { get; set; }
+        public  State States { get; set; }
 
 
         //realción unica:
-        public virtual ICollection<VotingGroup> VotingGroups { get; set; }
-        public virtual ICollection<Candidate> Candidates { get; set; }
-
-
+        public List<VotingGroup> VotingGroups { get; set; }
+        public List<Candidate> Candidates { get; set; }
     }
 }

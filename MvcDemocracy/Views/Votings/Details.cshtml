@@ -1,4 +1,4 @@
-﻿@model MvcDemocracy.Models.Voting
+﻿@model MvcDemocracy.Models.DetailsVotingView
 
 @{
     ViewBag.Title = "Details";
@@ -104,3 +104,58 @@
     @Html.ActionLink("Add Candidate", "AddCandidate", new { id = Model.VotingId }, new { @class = "btn btn-info" }) 
     @Html.ActionLink("Back to List", "Index", new { },new { @class = "btn btn-success"})
 </p>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <section id="groups">
+           <h4>Groups.</h4>
+            @*pregunto si hay grupos:*@
+            @if (Model.VotingGroups.Count > 0)
+            {
+                <table class="table">
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.VotingGroups[0].Group.Description)
+                        </th>
+                      
+                        <th></th>
+                    </tr>
+                    @for (int i = 0; i <Model.VotingGroups.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => modelItem.VotingGroups[i].Group.Description)
+                            </td>
+                            <td>
+                                @*@Html.ActionLink("Edit", "Edit", new { id = item.GroupId }, new { @class = "btn btn-primary" })
+                                @Html.ActionLink("Details", "Details", new { id = item.GroupId }, new { @class = "btn btn-info" })*@
+                                @Html.ActionLink("Delete", "DeleteGroup", new { id = Model.VotingGroups[i].VotingGroupId }, new { @class = "btn btn-danger" })
+                            </td>
+                        </tr>
+                    }
+
+                </table>
+            }
+            else
+            {
+                <h5>Not groups added yet.</h5>
+            }
+        </section>
+    </div>
+    <div class="col-md-8">
+        <section id="candidates">
+            <h4>Candidates.</h4>
+            @*pregunto si hay candidatos:*@
+            @if (Model.Candidates.Count > 0)
+            {
+
+            }
+            else
+            {
+                <h5>Not groups Candidate yet.</h5>
+            }
+        </section>
+    </div>
+</div>

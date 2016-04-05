@@ -28,7 +28,9 @@ namespace MvcDemocracy.Controllers
                 //Aquí a ver si si lo encontro:
                 if (votingGroup != null)
                 {
-                    ViewBag.Error = "Thr group already belong to Voting.";
+                    ModelState.AddModelError("", "The group already belong to Voting.");
+
+                    //ViewBag.Error = "The group already belong to Voting.";
 
                     ViewBag.GroupId = new SelectList(db.Groups.OrderBy(g => g.Description), "GroupId", "Description");
 
@@ -85,7 +87,26 @@ namespace MvcDemocracy.Controllers
             {
                 return HttpNotFound();
             }
-            return View(voting);
+
+            var view = new DetailsVotingView
+            {
+              Candidates = voting.Candidates.ToList(),
+              CandidateWinId = voting.CandidateWinId,
+              DateTimeEnd = voting.DateTimeEnd,
+              DateTimeStart = voting.DateTimeStart,
+              Description = voting.Description,
+              IsEnableBlankVote = voting.IsEnableBlankVote,
+              IsForAllUsers = voting.IsForAllUsers,
+              QuantityBlankVotes = voting.QuantityBlankVotes,
+              QuantityVotes = voting.QuantityVotes,
+              Remarks = voting.Remarks,
+              StateId = voting.StateId,
+              VotingGroups = voting.VotingGroups.ToList(),
+              VotingId = voting.VotingId,
+
+            };
+
+            return View(view);
         }
 
         // GET: Votings/Create
