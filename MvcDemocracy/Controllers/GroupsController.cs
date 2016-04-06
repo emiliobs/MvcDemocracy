@@ -75,6 +75,7 @@ namespace MvcDemocracy.Controllers
         public  ActionResult AddMember(int groupId)
         {              
             ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
+
             var view = new AddMemberView
             {
                 GroupId = groupId, 

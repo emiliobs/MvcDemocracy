@@ -15,6 +15,96 @@ namespace MvcDemocracy.Controllers
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
+        public ActionResult DeleteGroup(int id)
+        {
+
+            //buscar el id a eliminar:
+            var votingGroup = db.VotingGroups.Find(id);
+
+            if (votingGroup != null)
+            {
+                db.VotingGroups.Remove(votingGroup);
+                db.SaveChanges();
+            }
+
+
+
+            return RedirectToAction($"Details/{votingGroup.VotingId}");
+        }
+
+        public ActionResult DeleteCandidate(int id)
+        {
+            //buscar el id a eliminar:
+            var cadidate = db.Candidates.Find(id);
+
+            if (cadidate != null)
+            {
+                db.Candidates.Remove(cadidate);
+                db.SaveChanges();
+            }
+
+
+
+            return RedirectToAction($"Details/{cadidate.VotingId}");
+        }
+
+        [HttpGet]
+        public ActionResult AddCandidate(int id)
+        {
+            var view = new AddCandidateView
+            {
+                VotingId = id,
+            };
+
+            ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
+
+
+
+            return View(view);
+        }
+
+        [HttpPost]
+        public ActionResult AddCandidate(AddCandidateView view)
+        {
+
+
+            if (ModelState.IsValid)
+            {
+                //busco si grupo existe o si ya esta seleccionado:
+                var candidate = db.Candidates.Where(c => c.VotingId == view.VotingId &&
+                                 c.UserId == view.UserId).FirstOrDefault();//ejecuto la funcion link:
+
+                //Aquí a ver si si lo encontro:
+                if (candidate != null)
+                {
+                    ModelState.AddModelError("", "The Candidate already belong to Voting.");
+
+                    //ViewBag.Error = "The group already belong to Voting.";
+
+                    ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
+
+                    return View(view);
+                }
+
+                //Si no existe debo crear el objeto de bd: y despues de crear el objeto lo envio a la base de datos:
+                candidate = new  Candidate
+                {
+                    UserId = view.UserId,
+                    VotingId = view.VotingId,
+                };
+
+                db.Candidates.Add(candidate);
+                db.SaveChanges();
+
+                return RedirectToAction($"Details/{view.VotingId}");
+            }
+
+            ViewBag.UserId = new SelectList(db.Users.OrderBy(u => u.FirstName).ThenBy(u => u.lastName), "UserId", "FullName").ToList();
+
+
+            return View(view);
+
+        }
 
         [HttpPost]
         public ActionResult AddGroup(VotingGroup  addGroupView)
@@ -103,6 +193,7 @@ namespace MvcDemocracy.Controllers
               StateId = voting.StateId,
               VotingGroups = voting.VotingGroups.ToList(),
               VotingId = voting.VotingId,
+              States = voting.States,
 
             };
 
