@@ -9,7 +9,7 @@ using System.Web.Mvc;
 
 namespace MvcDemocracy.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class StatesController : Controller
     {
         MvcDemocracyContext db = new MvcDemocracyContext();

@@ -10,7 +10,7 @@ using MvcDemocracy.Models;
 
 namespace MvcDemocracy.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class VotingsController : Controller
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();

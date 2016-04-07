@@ -13,7 +13,7 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace MvcDemocracy.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
@@ -21,6 +21,14 @@ namespace MvcDemocracy.Controllers
         // GET: Users
         public ActionResult Index()
         {
+            var users = db.Users.ToList();
+            var userView = new List<UserIndexView>();
+
+            foreach (var item in collection)
+            {
+
+            }
+
             return View(db.Users.ToList());
         }
 
