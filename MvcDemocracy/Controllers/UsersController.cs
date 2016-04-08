@@ -13,25 +13,146 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace MvcDemocracy.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class UsersController : Controller
-    {
+    {             
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
+        [HttpPost]
+        public ActionResult MySettings(UserSettingView view)
+        {
+            if (ModelState.IsValid)
+            {
+                //Upload Image:
+                string path = string.Empty;
+                string picture = string.Empty;
+
+                if (view.NewPhoto != null)
+                {
+                    picture = Path.GetFileName(view.NewPhoto.FileName);
+                    path = Path.Combine(Server.MapPath("~/Content/Photos"), picture);
+                    view.NewPhoto.SaveAs(path);
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        view.NewPhoto.InputStream.CopyTo(ms);
+                        byte[] array = ms.GetBuffer();
+                    }
+                }
+
+                var user = db.Users.Find(view.UserId);
+
+                user.Address = view.Address;
+                user.FirstName = view.FirstName;
+                user.Grade = view.Grade;
+                user.Group = view.Group;
+                user.lastName = view.lastName;
+                user.Phone = view.Phone;
+
+                if (!string.IsNullOrEmpty(picture))
+                {
+                    user.Photo = string.Format("~/Content/Photos/{0}", picture);
+                }
+
+
+                db.Entry(user).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return RedirectToAction("Index","Home");
+            }
+
+            return View(view);
+        }
+
+        [Authorize(Roles = "User")]
+        public ActionResult MySettings()
+        {
+            var user = db.Users.Where(u => u.UserName == this.User.Identity.Name).FirstOrDefault();
+
+            var view = new UserSettingView
+            {
+                Address = user.Address,
+                FirstName = user.FirstName,
+                Grade = user.Grade,
+                Group = user.Group,
+                lastName = user.lastName,
+                Phone = user.Phone,
+                Photo = user.Photo,
+                UserId = user.UserId,
+                UserName = user.UserName,
+            };
+
+            return View(view);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult OnOffAdmin(int id)
+        {
+            var user = db.Users.Find(id);
+
+            if (user != null)
+            {
+                var userContext = new ApplicationDbContext();
+
+                var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(userContext));
+
+                var userASP = userManager.FindByEmail(user.UserName);
+
+                if (userASP != null)
+                {
+                    if (userManager.IsInRole(userASP.Id, "Admin"))
+                    {
+                        userManager.RemoveFromRole(userASP.Id, "Admin");   
+                    }
+                    else
+                    {
+                        userManager.AddToRole(userASP.Id, "Admin");
+                    }
+                }
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "Admin")]
         // GET: Users
         public ActionResult Index()
         {
+            var userContext = new ApplicationDbContext();
+
+            var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(userContext));
+
             var users = db.Users.ToList();
+
             var userView = new List<UserIndexView>();
 
-            foreach (var item in collection)
+            foreach (var user in users)
             {
+                var userASP = userManager.FindByEmail(user.UserName);
 
+                userView.Add(new UserIndexView
+                {
+
+                    Address = user.Address,
+                    Candidates = user.Candidates,
+                    FirstName = user.FirstName,
+                    Grade = user.Grade,
+                    Group = user.Group,
+                    GroupMembers = user.GroupMembers,
+                    IsAdmin = userASP != null && userManager.IsInRole(userASP.Id, "Admin"),
+                    lastName = user.lastName,
+                    Phone = user.Phone,
+                    Photo = user.Photo,
+                    UserId = user.UserId,
+                    UserName = user.UserName,
+
+                });
             }
 
-            return View(db.Users.ToList());
+            return View(userView);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Users/Details/5
         public ActionResult Details(int? id)
         {
@@ -47,11 +168,13 @@ namespace MvcDemocracy.Controllers
             return View(user);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Users/Create
         public ActionResult Create()
         {
             return View();
         }
+
 
         // POST: Users/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -155,6 +278,7 @@ namespace MvcDemocracy.Controllers
             userManager.AddToRole(userASP.Id, "User");
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Users/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -237,6 +361,7 @@ namespace MvcDemocracy.Controllers
             return View(userView);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Users/Delete/5
         public ActionResult Delete(int? id)
         {

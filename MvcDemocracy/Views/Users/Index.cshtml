@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MvcDemocracy.Models.User>
+﻿@model IEnumerable<MvcDemocracy.Models.UserIndexView>
 
 @{
     ViewBag.Title = "Index";
@@ -35,6 +35,9 @@
         <th>
             @Html.DisplayNameFor(model => model.Photo)
         </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsAdmin)
+        </th>
         <th></th>
     </tr>
 
@@ -68,10 +71,22 @@
             }
         </td>
         <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.UserId }, new { @class = "btn btn-primary" })
-            @Html.ActionLink("Details", "Details", new { id=item.UserId }, new { @class = "btn btn-info" }) 
-            @Html.ActionLink("Delete", "Delete", new { id=item.UserId }, new { @class = "btn btn-danger" })
+            @Html.DisplayFor(modelItem => item.IsAdmin)
         </td>
+           <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.UserId }, new { @class = "btn btn-primary" })
+            </td>
+        <td>    
+        @Html.ActionLink("Details", "Details", new { id=item.UserId }, new { @class = "btn btn-info" }) 
+            </td>
+        <td>
+            @Html.ActionLink("On/Off Administrator", "OnOffAdmin", new { id = item.UserId }, new { @class = "btn btn-warning" })
+            </td>
+        <td>
+            @Html.ActionLink("Delete", "Delete", new { id=item.UserId }, new { @class = "btn btn-danger" })
+        
+        </td>
+       
     </tr>
 }
 

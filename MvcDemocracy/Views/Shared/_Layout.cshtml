@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Democracy</title>
+    <title>@ViewBag.Title - Democracy Application</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 
@@ -34,10 +34,22 @@
                     <li>@Html.ActionLink("Home", "Index", "Home")</li>
                     <li>@Html.ActionLink("About", "About", "Home")</li>
                     <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                    <li>@Html.ActionLink("Groups", "Index", "Groups")</li>
-                    <li>@Html.ActionLink("States", "Index", "States")</li>
-                    <li>@Html.ActionLink("Votings", "Index", "Votings")</li>
-                    <li>@Html.ActionLink("Users", "Index", "Users")</li>
+                    @if (this.User.IsInRole("Admin"))
+                    {
+                        <li>@Html.ActionLink("Groups", "Index", "Groups")</li>
+                        <li>@Html.ActionLink("States", "Index", "States")</li>
+                        <li>@Html.ActionLink("Votings", "Index", "Votings")</li>
+                        <li>@Html.ActionLink("Users", "Index", "Users")</li>
+                    }
+                    @if (this.User.IsInRole("User"))
+                    {
+                        <li>@Html.ActionLink("My Settings", "MySettings", "Users")</li>
+                        <li>@Html.ActionLink("My Votings", "MyVotings", "Votings")</li>
+                        <li>@Html.ActionLink("Results", "Results", "Votings")</li>
+                        
+                    }
+                   
+                
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

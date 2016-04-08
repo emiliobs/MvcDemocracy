@@ -8,14 +8,9 @@ using System.Web;
 namespace MvcDemocracy.Models
 {
     [NotMapped]
-    public class UserIndexView   : User
+    public class UserSettingView:User
     {
-      
-    
-        [Display(Name = "Is Admin")]
-        public bool IsAdmin { get; set; }
-
-
-        
+        [Display(Name = "New Photo")]
+        public HttpPostedFileBase NewPhoto { get; set; }
     }
 }

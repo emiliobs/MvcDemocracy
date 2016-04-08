@@ -9,7 +9,7 @@ using System.Web;
 
 namespace MvcDemocracy.Models
 {
-    public class UserView
+    public class UserView  
     {
        
         public int UserId { get; set; }
