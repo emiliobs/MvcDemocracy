@@ -10,11 +10,19 @@ using MvcDemocracy.Models;
 
 namespace MvcDemocracy.Controllers
 {
-    [Authorize(Roles = "Admin")]
+
     public class VotingsController : Controller
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
+        [Authorize(Roles ="User")]
+        public ActionResult MyVotings()
+        {
+
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteGroup(int id)
         {
 
@@ -26,12 +34,12 @@ namespace MvcDemocracy.Controllers
                 db.VotingGroups.Remove(votingGroup);
                 db.SaveChanges();
             }
-
-
+               
 
             return RedirectToAction($"Details/{votingGroup.VotingId}");
         }
 
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteCandidate(int id)
         {
             //buscar el id a eliminar:
@@ -48,6 +56,7 @@ namespace MvcDemocracy.Controllers
             return RedirectToAction($"Details/{cadidate.VotingId}");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public ActionResult AddCandidate(int id)
         {
@@ -145,6 +154,7 @@ namespace MvcDemocracy.Controllers
             return View(addGroupView);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public ActionResult AddGroup(int id)
         {
@@ -158,6 +168,7 @@ namespace MvcDemocracy.Controllers
             return View(view);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Votings
         public ActionResult Index()
         {
@@ -165,6 +176,7 @@ namespace MvcDemocracy.Controllers
             return View(votings.ToList());
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Votings/Details/5
         public ActionResult Details(int? id)
         {
@@ -200,6 +212,7 @@ namespace MvcDemocracy.Controllers
             return View(view);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Votings/Create
         public ActionResult Create()
         {
@@ -244,6 +257,7 @@ namespace MvcDemocracy.Controllers
             return View(votingView);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Votings/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -313,6 +327,7 @@ namespace MvcDemocracy.Controllers
             return View(votingView);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Votings/Delete/5
         public ActionResult Delete(int? id)
         {
