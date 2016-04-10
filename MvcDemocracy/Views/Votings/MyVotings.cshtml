@@ -1,0 +1,91 @@
+﻿@model IEnumerable<MvcDemocracy.Models.Voting>
+
+@{
+    ViewBag.Title = "My Vontings";
+}
+
+<h2>My Vontings</h2>
+
+
+<table class="table">
+    <tr>
+        @*<th>
+            @Html.DisplayNameFor(model => model.States.Description)
+        </th>*@
+        <th>
+            @Html.DisplayNameFor(model => model.Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Remarks)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateTimeStart)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateTimeEnd)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsForAllUsers)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsEnableBlankVote)
+        </th>
+        @*<th>
+            @Html.DisplayNameFor(model => model.QuantityVotes)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.QuantityBlankVotes)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CandidateWinId)
+        </th>*@
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        @*<td>
+            @Html.DisplayFor(modelItem => item.States.Description)
+        </td>*@
+        <td>
+            @Html.DisplayFor(modelItem => item.Description)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Remarks)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateTimeStart)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateTimeEnd)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IsForAllUsers)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IsEnableBlankVote)
+        </td>
+        @*<td>
+            @Html.DisplayFor(modelItem => item.QuantityVotes)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.QuantityBlankVotes)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.CandidateWinId)
+        </td>*@
+        <td>
+            @Html.ActionLink("Vote", "Vote", new { votingId = item.VotingId }, new { @class = "btn btn-primary" })
+            
+        </td>
+        @*<td>
+            @Html.ActionLink("Details", "Details", new { id = item.VotingId }, new { @class = "btn btn-info" })
+            
+        </td>
+        <td>
+            @Html.ActionLink("Delete", "Delete", new { id = item.VotingId }, new { @class = "btn btn-danger" })
+        </td>*@
+    </tr>
+}
+
+</table>

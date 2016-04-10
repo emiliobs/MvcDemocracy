@@ -19,6 +19,9 @@ namespace MvcDemocracy.Models
         public virtual Voting Voting { get; set; }
         public virtual User User  { get; set; }
 
+        //relacion uno a muchos:
+        public virtual ICollection<VotingDetail> VotingDetails { get; set; }
+
 
     }
 }

@@ -58,6 +58,8 @@ namespace MvcDemocracy.Models
         public virtual ICollection<GroupMember> GroupMembers { get; set; }
         public virtual ICollection<Candidate> Candidates { get; set; }
 
+        public virtual ICollection<VotingDetail> VotingDetails { get; set; }
+
 
     }
 }

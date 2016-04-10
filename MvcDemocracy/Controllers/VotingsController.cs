@@ -16,10 +16,192 @@ namespace MvcDemocracy.Controllers
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
         [Authorize(Roles ="User")]
+        public ActionResult VoteForCandidate(int candidateId, int votingId)
+        {
+            //BUscamos el usuario:
+            var user = db.Users.Where(u => u.UserName == this.User.Identity.Name).FirstOrDefault();//Usuario logiado:
+
+            //valido el usuario:
+            if (user == null)//ese man no estas:
+            {
+                return RedirectToAction("Index","Home");// lo mando al index del home por quue usted no puede votat://
+            }
+
+            //valido el candidato:
+            var candidate = db.Candidates.Find(candidateId);
+
+            if (candidate == null)
+            {
+                return RedirectToAction("Index", "Home");
+
+            }
+
+            var voting = db.Votings.Find(votingId);
+
+            if (voting == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            //método  VoteCandidate(user,candidate,voting)
+            if (this.VoteCandidate(user, candidate,voting))
+            {
+                return RedirectToAction("MyVotings");
+            }
+
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        private bool VoteCandidate(User user, Candidate candidate, Voting voting)
+        {
+            using (var transaction = db.Database.BeginTransaction())
+            {
+                var votingDetail = new VotingDetail
+                {
+                  CandidateId = candidate.CandidateId,
+                  DateTime = DateTime.Now,
+                  UserId = user.UserId,
+                  VotingId = voting.VotingId,
+                };
+
+                db.VotingDetails.Add(votingDetail);
+
+                candidate.QuantityVotes++;
+                db.Entry(candidate).State = EntityState.Modified;
+
+                voting.QuantityVotes++;
+                db.Entry(voting).State = EntityState.Modified;
+
+                try
+                {
+                    db.SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+
+                    transaction.Rollback();
+                    
+                }         
+            }
+
+            return false;
+        }
+
+        [Authorize(Roles = "User")]
+        public ActionResult Vote(int votingId)
+        {
+            //BUsco el votingid enviado desde la vista: 
+            var voting = db.Votings.Find(votingId);//objeto voting:
+
+            var view = new VotingVoteView
+            {
+               DateTimeEnd = voting.DateTimeEnd,
+               DateTimeStart = voting.DateTimeStart,
+               Description = voting.Description,
+               IsEnableBlankVote = voting.IsEnableBlankVote,
+               IsForAllUsers = voting.IsForAllUsers,
+               MyCandidates = voting.Candidates.ToList(),
+               Remarks = voting.Remarks,
+               VotingId = voting.VotingId,
+            };
+
+
+
+            return View(view);
+        }
+
+        [Authorize(Roles ="User")]
         public ActionResult MyVotings()
         {
+            var user = db.Users.Where(u => u.UserName == this.User.Identity.Name).FirstOrDefault();
 
-            return View();
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "There an error with the current user. call the support.");
+
+                return View();
+            }
+
+            //Get event voting for the current time:
+            var state = this.GetState("Open");
+
+            var votings = db.Votings.Where(v => v.StateId == state.StateId && 
+                          v.DateTimeStart <= DateTime.Now && 
+                          v.DateTimeEnd >=DateTime.Now).
+                          Include(v => v.Candidates).
+                          Include(v => v.VotingGroups).
+                          Include(v => v.States).ToList();
+
+            //Discart evets in the wich the user already vote:
+            for (int i  = 0; i  < votings.Count; i ++)
+            {
+                int userId = user.UserId;
+                int votingId = votings[i].VotingId;
+
+                var votingDetail = db.VotingDetails.Where(vd => vd.VotingId == votingId && vd.UserId == userId).FirstOrDefault();
+
+                if (votingDetail != null)
+                {
+                    votings.RemoveAt(i);
+
+                }
+            }
+
+            //Discart events by groups in wich the user are not included:
+            for (int i = 0; i < votings.Count; i++)
+            {
+                if (!votings[i].IsForAllUsers)//si no es para todos los usuario haga esto:
+                {
+                    bool userBelongsToGroup = false;
+
+                    foreach (var votingGroup in votings[i].VotingGroups)
+                    {
+                        //pregunto si estoy en el grupo:
+                        var userGroup = votingGroup.Group.GroupMembers.Where(gm => gm.UserId == user.UserId).FirstOrDefault();
+
+                        //pregunso si si lo encontro o no(al usuario en algun grupo):
+                        if (userGroup != null)
+                        {
+                            userBelongsToGroup = true;
+                            break;
+                        }     
+                    }
+
+                    //si es null es por que no pertence al grupo que dael derecho de votación:
+                    if (!userBelongsToGroup)//si el usuario no pertenece al grupo
+                    {
+                        votings.RemoveAt(i);
+                    } 
+                }
+
+                    
+            }
+
+            return View(votings);
+        }
+
+        private State GetState(string stateName)
+        {
+
+            //Aseguro que siempre el estado sea open si no esxiste:
+            var state = db.States.Where(s => s.Description == stateName).FirstOrDefault();
+
+            if (state == null)
+            {
+                state = new State
+                {
+                    Description = stateName,
+                };
+
+                db.States.Add(state);
+                db.SaveChanges();
+
+            }
+
+            return state;
         }
 
         [Authorize(Roles = "Admin")]
