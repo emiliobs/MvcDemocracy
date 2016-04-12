@@ -10,6 +10,11 @@ using MvcDemocracy.Models;
 using System.IO;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using CrystalDecisions.CrystalReports.Engine;
+//
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace MvcDemocracy.Controllers
 {
@@ -17,6 +22,72 @@ namespace MvcDemocracy.Controllers
     public class UsersController : Controller
     {             
         private MvcDemocracyContext db = new MvcDemocracyContext();
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult DOC()
+        {
+            var report = this.GenerateUserRepost();
+
+            var stream = report.ExportToStream(CrystalDecisions.Shared.ExportFormatType.WordForWindows);
+
+            return File(stream, "application/doc","Users.doc");
+        }
+
+        [Authorize(Roles ="Admin")] 
+        public ActionResult XLS()
+        {
+            var report = this.GenerateUserRepost();
+            var stream = report.ExportToStream(CrystalDecisions.Shared.ExportFormatType.Excel);
+            return File(stream, "application/xls", "Users.xls");
+        }
+
+         [Authorize(Roles = "Admin")]
+         public ActionResult PDF()
+        {
+            var report = this.GenerateUserRepost();
+
+            var stream = report.ExportToStream(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat);
+
+            return File(stream, "application/pdf");
+        }
+
+        private ReportClass GenerateUserRepost()
+        {
+            var cs = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+            var con = new SqlConnection(cs);
+
+            var dt = new DataTable();
+
+            var sql = "select * from Users order by lastName, FirstName";
+
+            try
+            {
+                con.Open();
+
+                var cmd = new SqlCommand(sql, con);
+                var da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
+
+
+            }
+            catch (Exception ex)
+            {
+
+                ex.ToString();
+            }
+
+            var report = new ReportClass();
+            report.FileName = Server.MapPath("/Reports/Users.rpt");
+            //cargo el reporte en memoria:
+            report.Load();
+            report.SetDataSource(dt);
+
+            return report;
+
+
+
+        }
 
         [HttpPost]
         public ActionResult MySettings(UserSettingView view)

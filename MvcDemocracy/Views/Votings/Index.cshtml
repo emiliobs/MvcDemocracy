@@ -81,8 +81,15 @@
             
         </td>
         <td>
-            @Html.ActionLink("Details", "Details", new { id = item.VotingId }, new { @class = "btn btn-info" })
+            @Html.ActionLink("Details", "Details", new { id = item.VotingId }, new { @class = "btn btn-warning" })
             
+        </td>
+        <td>
+            @Html.ActionLink("Results", "ShowResults", new { id = item.VotingId },
+                                 new { @class = "btn btn-default", target = "_blank" })
+        </td>
+        <td>
+            @Html.ActionLink("Close", "Close", new { id = item.VotingId }, new { @class = "btn btn-info" })
         </td>
         <td>
             @Html.ActionLink("Delete", "Delete", new { id = item.VotingId }, new { @class = "btn btn-danger" })

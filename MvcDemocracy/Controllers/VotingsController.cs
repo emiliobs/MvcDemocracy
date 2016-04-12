@@ -7,6 +7,9 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MvcDemocracy.Models;
+using CrystalDecisions.CrystalReports.Engine;
+using System.Configuration;
+using System.Data.SqlClient;
 
 namespace MvcDemocracy.Controllers
 {
@@ -14,6 +17,64 @@ namespace MvcDemocracy.Controllers
     public class VotingsController : Controller
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
+
+        [Authorize(Roles = "User")]
+        public ActionResult Results()
+        {
+            var votings = db.Votings.Include(v => v.States);
+            return View(votings.ToList());
+        }
+
+        [Authorize(Roles = "User")]
+        public ActionResult ShowResults(int id)
+        {
+            var report = this.GenerateResultRepost(id);
+
+            var stream = report.ExportToStream(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat);
+
+            return File(stream, "application/pdf");
+        }
+
+        private ReportClass GenerateResultRepost(int id)
+        {
+            var cs = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+
+            var con = new SqlConnection(cs);
+
+            var dt = new DataTable();
+
+            var sql = @"SELECT  Votings.VotingId, Votings.Description AS Voting, States.Description AS State, 
+                       Users.FirstName + ' ' + Users.lastName AS Candidate, Candidates.QuantityVotes
+                        FROM   Candidates INNER JOIN
+                        Users ON Candidates.UserId = Users.UserId INNER JOIN
+                        Votings ON Candidates.VotingId = Votings.VotingId INNER JOIN
+                        States ON Votings.StateId = States.StateId
+                        where Votings.VotingId =" + id;
+
+            try
+            {
+                con.Open();
+
+                var cmd = new SqlCommand(sql, con);
+                var da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
+
+
+            }
+            catch (Exception ex)
+            {
+
+                ex.ToString();
+            }
+
+            var report = new ReportClass();
+            report.FileName = Server.MapPath("/Reports/Results.rpt");
+            //cargo el reporte en memoria:
+            report.Load();
+            report.SetDataSource(dt);
+
+            return report;
+        }
 
         [Authorize(Roles ="User")]
         public ActionResult VoteForCandidate(int candidateId, int votingId)
@@ -136,49 +197,87 @@ namespace MvcDemocracy.Controllers
                           Include(v => v.States).ToList();
 
             //Discart evets in the wich the user already vote:
-            for (int i  = 0; i  < votings.Count; i ++)
+            foreach (var voting in votings.ToList())//cuando a una lista le ponemos tolist(), es una copia en memoria de la lista:
             {
-                int userId = user.UserId;
-                int votingId = votings[i].VotingId;
+                //int userId = user.UserId;
+                //int votingId = voting.VotingId;
 
-                var votingDetail = db.VotingDetails.Where(vd => vd.VotingId == votingId && vd.UserId == userId).FirstOrDefault();
+                var votingDetail = db.VotingDetails.Where(vd => vd.VotingId == voting.VotingId && vd.UserId == user.UserId).FirstOrDefault();
 
                 if (votingDetail != null)
                 {
-                    votings.RemoveAt(i);
+                    votings.Remove(voting);
 
                 }
             }
 
+            //for (int i  = 0; i  < votings.Count; i ++)
+            //{
+            //    int userId = user.UserId;
+            //    int votingId = votings[i].VotingId;
+
+            //    var votingDetail = db.VotingDetails.Where(vd => vd.VotingId == votingId && vd.UserId == userId).FirstOrDefault();
+
+            //    if (votingDetail != null)
+            //    {
+            //        votings.RemoveAt(i);
+
+            //    }
+            //}
+
             //Discart events by groups in wich the user are not included:
-            for (int i = 0; i < votings.Count; i++)
+            foreach (var voting in votings.ToList())
             {
-                if (!votings[i].IsForAllUsers)//si no es para todos los usuario haga esto:
+                if (!voting.IsForAllUsers)
                 {
                     bool userBelongsToGroup = false;
 
-                    foreach (var votingGroup in votings[i].VotingGroups)
+                    foreach (var votinGroup in voting.VotingGroups)
                     {
-                        //pregunto si estoy en el grupo:
-                        var userGroup = votingGroup.Group.GroupMembers.Where(gm => gm.UserId == user.UserId).FirstOrDefault();
+                        var userGroup = votinGroup.Group.GroupMembers.Where(gm => gm.UserId == user.UserId).FirstOrDefault();
 
-                        //pregunso si si lo encontro o no(al usuario en algun grupo):
                         if (userGroup != null)
                         {
                             userBelongsToGroup = true;
                             break;
-                        }     
+                        }
                     }
 
-                    //si es null es por que no pertence al grupo que dael derecho de votación:
-                    if (!userBelongsToGroup)//si el usuario no pertenece al grupo
+                    if (!userBelongsToGroup)
                     {
-                        votings.RemoveAt(i);
-                    } 
+                        votings.Remove(voting);
+                    }
                 }
+            }
+
+            //for (int i = 0; i < votings.Count; i++)
+            //{
+            //    if (!votings[i].IsForAllUsers)//si no es para todos los usuario haga esto:
+            //    {
+            //        bool userBelongsToGroup = false;
+
+            //        foreach (var votingGroup in votings[i].VotingGroups)
+            //        {
+            //            //pregunto si estoy en el grupo:
+            //            var userGroup = votingGroup.Group.GroupMembers.Where(gm => gm.UserId == user.UserId).FirstOrDefault();
+
+            //            //pregunso si si lo encontro o no(al usuario en algun grupo):
+            //            if (userGroup != null)
+            //            {
+            //                userBelongsToGroup = true;
+            //                break;
+            //            }     
+            //        }
+
+            //        //si es null es por que no pertence al grupo que dael derecho de votación:
+            //        if (!userBelongsToGroup)//si el usuario no pertenece al grupo
+            //        {
+            //            votings.RemoveAt(i);
+            //        } 
+            //    }
 
                     
-            }
+            //}
 
             return View(votings);
         }

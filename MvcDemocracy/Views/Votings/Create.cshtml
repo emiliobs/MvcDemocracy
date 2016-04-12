@@ -116,14 +116,13 @@
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Create" class="btn btn-default" />
+                @Html.ActionLink("Back to List", "Index", new { }, new { @class = "btn btn-info" })
             </div>
         </div>
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index", new { }, new { @class = "btn btn-default" })
-</div>
+
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
