@@ -18,14 +18,75 @@ namespace MvcDemocracy.Controllers
     {
         private MvcDemocracyContext db = new MvcDemocracyContext();
 
-        [Authorize(Roles = "User")]
-        public ActionResult Results()
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult Close(int id)
         {
-            var votings = db.Votings.Include(v => v.States);
-            return View(votings.ToList());
+            var voting = db.Votings.Find(id);
+            if (voting != null)
+            {
+                var candidate = db.Candidates.Where(c => c.VotingId ==  voting.VotingId)
+                               .OrderByDescending(c => c.QuantityVotes).FirstOrDefault();
+
+                if (candidate != null)
+                {
+                    var state = this.GetState("Closed");
+                    voting.StateId = state.StateId;
+                    voting.CandidateWinId = candidate.User.UserId;
+                    db.Entry(voting).State = EntityState.Modified;
+                    db.SaveChanges();
+
+                }
+            }
+
+            
+
+            return RedirectToAction("Index");
         }
 
         [Authorize(Roles = "User")]
+        public ActionResult Results()
+        {
+            var state = this.GetState("Closed");
+
+            var votings = db.Votings.Where(v => v.StateId == state.StateId).Include(v => v.States);
+
+            var views = new List<VotingIndexView>();
+            //creo otra conexion por que la primera ya hasido invocada:
+            var db2 = new MvcDemocracyContext();
+
+
+            foreach (var voting in votings)
+            {
+                User user = null;
+                if (voting.CandidateWinId != 0)
+                {
+                    user = db2.Users.Find(voting.CandidateWinId);//en user os queda el objeto ganador:
+                }
+
+                views.Add(new VotingIndexView
+                {
+                    CandidateWinId = voting.CandidateWinId,
+                    DateTimeEnd = voting.DateTimeEnd,
+                    DateTimeStart = voting.DateTimeStart,
+                    Description = voting.Description,
+                    IsEnableBlankVote = voting.IsEnableBlankVote,
+                    IsForAllUsers = voting.IsForAllUsers,
+                    QuantityBlankVotes = voting.QuantityBlankVotes,
+                    Remarks = voting.Remarks,
+                    StateId = voting.StateId,
+                    States = voting.States,
+                    VotingId = voting.VotingId,
+                    Winner = user,
+
+                });
+
+            }
+
+            return View(views);
+        }
+
+       [Authorize(Roles = "User, Admin")]
         public ActionResult ShowResults(int id)
         {
             var report = this.GenerateResultRepost(id);
@@ -454,7 +515,40 @@ namespace MvcDemocracy.Controllers
         public ActionResult Index()
         {
             var votings = db.Votings.Include(v => v.States);
-            return View(votings.ToList());
+
+            var views = new List<VotingIndexView>();
+            //creo otra conexion por que la primera ya hasido invocada:
+            var db2 = new MvcDemocracyContext();
+
+
+            foreach (var  voting in votings)
+            {
+                User user = null;
+                if (voting.CandidateWinId != 0)
+                {
+                    user = db2.Users.Find(voting.CandidateWinId);//en user os queda el objeto ganador:
+                }
+
+                views.Add(new VotingIndexView
+                {
+                    CandidateWinId = voting.CandidateWinId,
+                    DateTimeEnd = voting.DateTimeEnd,
+                    DateTimeStart = voting.DateTimeStart,
+                    Description = voting.Description,
+                    IsEnableBlankVote = voting.IsEnableBlankVote,
+                    IsForAllUsers = voting.IsForAllUsers,
+                    QuantityBlankVotes = voting.QuantityBlankVotes,
+                    Remarks = voting.Remarks,
+                    StateId = voting.StateId,
+                    States = voting.States,
+                    VotingId = voting.VotingId,
+                    Winner = user,
+
+                });
+                    
+            }
+
+            return View(views);
         }
 
         [Authorize(Roles = "Admin")]
