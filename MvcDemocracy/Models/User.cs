@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -54,10 +55,13 @@ namespace MvcDemocracy.Models
         [StringLength(200, ErrorMessage = "The field {0} can contain maximun {1} and minimum {2} characteres", MinimumLength = 5)]
         public string Photo { get; set; }
 
-
+         [JsonIgnore]
         public virtual ICollection<GroupMember> GroupMembers { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<Candidate> Candidates { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<VotingDetail> VotingDetails { get; set; }
 
 
