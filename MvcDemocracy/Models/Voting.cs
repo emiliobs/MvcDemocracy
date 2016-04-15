@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -54,13 +55,16 @@ namespace MvcDemocracy.Models
         public int CandidateWinId { get; set; }
 
         [Display(Name = "State")]
+        [JsonIgnore]
         public virtual State States { get; set; }
 
 
         //realción unica:
+        [JsonIgnore]
         public virtual ICollection<VotingGroup> VotingGroups { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Candidate> Candidates { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<VotingDetail> VotingDetails { get; set; }
 
 

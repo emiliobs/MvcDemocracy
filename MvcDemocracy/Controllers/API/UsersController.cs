@@ -105,7 +105,7 @@ namespace MvcDemocracy.Controllers.API
         [ResponseType(typeof(void))]
 
         [HttpPut]
-        public IHttpActionResult PutUser(int id, User user)
+        public IHttpActionResult PutUser(int id, UserChange user)
         {
             if (!ModelState.IsValid)
             {
@@ -117,22 +117,51 @@ namespace MvcDemocracy.Controllers.API
                 return BadRequest();
             }
 
+            //verificu si el usuario cambio:
+            var currentUser = db.Users.Find(id);
+            if (currentUser == null)
+            {
+                return this.BadRequest("User not Found.");
+            }
+
+            var userContext = new ApplicationDbContext();
+            var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(userContext));
+
+            var userASP = userManager.Find(currentUser.UserName, user.CurrentPassword);
+            
+            if (userASP == null)
+            {
+
+                return this.BadRequest("Password Wrong.");
+            }
+
+            if (currentUser.UserName != user.UserName)
+            {
+                Utilities.ChangeUserName(currentUser.UserName ,user);
+            }
+
+            var userModel = new User
+            {
+                Address = user.Address,
+                FirstName = user.FirstName,
+                Grade = user.Grade,
+                Group = user.Group,
+                lastName =user.lastName,
+                Phone = user.Phone,
+                Photo = user.Photo,
+                UserId = user.UserId,
+                UserName = user.UserName,
+            };
+
             db.Entry(user).State = EntityState.Modified;
 
             try
             {
                 db.SaveChanges();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return this.BadRequest(ex.Message.ToString()); 
             }
 
             return this.Ok(user);
@@ -214,7 +243,10 @@ namespace MvcDemocracy.Controllers.API
 
             if (response.Succeeded)
             {
-                return this.Ok("The Password was changed Successfully");
+                return this.Ok<object>(new
+                {
+                    Message = "The Password was changed Successfully"
+                });
             }           
             else
             {

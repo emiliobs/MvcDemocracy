@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -20,10 +21,10 @@ namespace MvcDemocracy.Models
 
         //Lados varios de la relacion:
 
-       
+        [JsonIgnore]
         public virtual Voting Voting { get; set; }
 
-       
+        [JsonIgnore]
         public virtual Group Group { get; set; }
 
 

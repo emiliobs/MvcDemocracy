@@ -10,7 +10,7 @@ using MvcDemocracy.Models;
 using CrystalDecisions.CrystalReports.Engine;
 using System.Configuration;
 using System.Data.SqlClient;
-
+using MvcDemocracy.Classes;
 namespace MvcDemocracy.Controllers
 {
 
@@ -30,7 +30,7 @@ namespace MvcDemocracy.Controllers
 
                 if (candidate != null)
                 {
-                    var state = this.GetState("Closed");
+                    var state = Utilities.GetState("Closed");
                     voting.StateId = state.StateId;
                     voting.CandidateWinId = candidate.User.UserId;
                     db.Entry(voting).State = EntityState.Modified;
@@ -47,7 +47,7 @@ namespace MvcDemocracy.Controllers
         [Authorize(Roles = "User")]
         public ActionResult Results()
         {
-            var state = this.GetState("Closed");
+            var state = Utilities.GetState("Closed");
 
             var votings = db.Votings.Where(v => v.StateId == state.StateId).Include(v => v.States);
 
@@ -247,69 +247,7 @@ namespace MvcDemocracy.Controllers
                 return View();
             }
 
-            //Get event voting for the current time:
-            var state = this.GetState("Open");
-
-            var votings = db.Votings.Where(v => v.StateId == state.StateId && 
-                          v.DateTimeStart <= DateTime.Now && 
-                          v.DateTimeEnd >=DateTime.Now).
-                          Include(v => v.Candidates).
-                          Include(v => v.VotingGroups).
-                          Include(v => v.States).ToList();
-
-            //Discart evets in the wich the user already vote:
-            foreach (var voting in votings.ToList())//cuando a una lista le ponemos tolist(), es una copia en memoria de la lista:
-            {
-                //int userId = user.UserId;
-                //int votingId = voting.VotingId;
-
-                var votingDetail = db.VotingDetails.Where(vd => vd.VotingId == voting.VotingId && vd.UserId == user.UserId).FirstOrDefault();
-
-                if (votingDetail != null)
-                {
-                    votings.Remove(voting);
-
-                }
-            }
-
-            //for (int i  = 0; i  < votings.Count; i ++)
-            //{
-            //    int userId = user.UserId;
-            //    int votingId = votings[i].VotingId;
-
-            //    var votingDetail = db.VotingDetails.Where(vd => vd.VotingId == votingId && vd.UserId == userId).FirstOrDefault();
-
-            //    if (votingDetail != null)
-            //    {
-            //        votings.RemoveAt(i);
-
-            //    }
-            //}
-
-            //Discart events by groups in wich the user are not included:
-            foreach (var voting in votings.ToList())
-            {
-                if (!voting.IsForAllUsers)
-                {
-                    bool userBelongsToGroup = false;
-
-                    foreach (var votinGroup in voting.VotingGroups)
-                    {
-                        var userGroup = votinGroup.Group.GroupMembers.Where(gm => gm.UserId == user.UserId).FirstOrDefault();
-
-                        if (userGroup != null)
-                        {
-                            userBelongsToGroup = true;
-                            break;
-                        }
-                    }
-
-                    if (!userBelongsToGroup)
-                    {
-                        votings.Remove(voting);
-                    }
-                }
-            }
+           
 
             //for (int i = 0; i < votings.Count; i++)
             //{
@@ -337,32 +275,15 @@ namespace MvcDemocracy.Controllers
             //        } 
             //    }
 
-                    
+
             //}
+
+           var votings = Utilities.MyVotings(user);
 
             return View(votings);
         }
 
-        private State GetState(string stateName)
-        {
-
-            //Aseguro que siempre el estado sea open si no esxiste:
-            var state = db.States.Where(s => s.Description == stateName).FirstOrDefault();
-
-            if (state == null)
-            {
-                state = new State
-                {
-                    Description = stateName,
-                };
-
-                db.States.Add(state);
-                db.SaveChanges();
-
-            }
-
-            return state;
-        }
+        
 
         [Authorize(Roles = "Admin")]
         public ActionResult DeleteGroup(int id)
