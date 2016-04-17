@@ -31,13 +31,38 @@ namespace MvcDemocracy.Controllers.API
 
             foreach (var voting in votings)
             {
+
+                User winner = null;
+
+                if (voting.CandidateWinId !=0)
+                {
+                    winner = db.Users.Find(voting.CandidateWinId);
+                }
+
+                var candidates = new List<CandidateResponse>();
+                foreach (var candidate in voting.Candidates)
+                {
+                    candidates.Add(new CandidateResponse
+                    {
+                        CandidateId = candidate.CandidateId,
+                        QuantityVotes = candidate.QuantityVotes,
+                        User =candidate.User,
+
+                    });
+                }
+
                 votingsResponse.Add(new VotingResponse
                 {
-                  DateTimeEnd = voting.DateTimeEnd,
-                  DateTimeStart = voting.DateTimeStart,
-                  CandidateWinId = voting.CandidateWinId,
-                  Candidates = voting.Candidates,
-                  Description = voting.Description  
+                    DateTimeEnd = voting.DateTimeEnd,
+                    DateTimeStart = voting.DateTimeStart,
+                    Description = voting.Description,
+                    IsEnableBlankVote = voting.IsEnableBlankVote,
+                    IsForAllUsers = voting.IsForAllUsers,
+                    Candidates = candidates,                  
+                    VotingId = voting.VotingId,
+                    Winner = winner,
+
+                 
                 });
             }
 

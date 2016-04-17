@@ -241,6 +241,7 @@
     <Compile Include="Models\AddCandidateView.cs" />
     <Compile Include="Models\AddMemberView.cs" />
     <Compile Include="Models\Candidate.cs" />
+    <Compile Include="Models\CandidateResponse.cs" />
     <Compile Include="Models\DetailsVotingView.cs" />
     <Compile Include="Models\Group.cs" />
     <Compile Include="Models\GroupDetailsView.cs" />
